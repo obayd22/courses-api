@@ -1,0 +1,68 @@
+const {validationResult} = require('express-validator');
+
+const Course = require('../models/course.model');
+
+const httpStatusText = require('../utils/httpStatusText');
+
+const asyncWrapper = require('../middlewares/asyncWrapper');
+
+const appError = require('../utils/appError');
+
+const getAllCourses = async (req , res) => {
+
+    const query = req.query; 
+    
+    const limit = query.limit || 2; 
+    const page  = query.page  || 1;
+    const skip  = (page - 1) * limit; // {page - 1} not to skip the page i am in
+    // remember => we skip elements***
+
+    const courses = await Course.find({}, {'__v': false}).limit(limit).skip(skip);
+    res.json({status: httpStatusText.SUCCESS, data: {courses: courses}});
+}
+
+const getCourse = asyncWrapper (
+
+    async (req, res, next) => {
+        const course = await Course.findById(req.params.courseID);
+
+        if (!course) {
+            const error = appError.create('course not found', 404, httpStatusText.FAIL)
+            return next(error);
+        }
+        res.json({status: httpStatusText.SUCCESS, data :{course}});
+    }
+)
+
+const addCourse = asyncWrapper( async (req, res, next) => {
+        const errors = validationResult(req);
+
+        if(!errors.isEmpty()) {            
+            const error = appError(errors.array(),400, httpStatusText.FAIL);
+            return next(error);
+        }
+        const newCourse = new Course (req.body);
+        
+        await newCourse.save();
+
+        res.status(201).json({status: httpStatusText.SUCCESS, data: {course: newCourse}}); 
+})
+
+const updateCourse = asyncWrapper (async (req, res) => {
+    const courseID = req.params.courseID;
+    const updatedCourse = await Course.updateOne({_id: courseID}, {$set: {...req.body}});
+    res.status(200).json({status: httpStatusText.SUCCESS, data: {course: updatedCourse}});
+})
+
+const deleteCourse = asyncWrapper( async (req, res) => {
+    await Course.deleteOne({_id: req.params.courseID});
+    res.status(200).json({status: httpStatusText.SUCCESS, data: null});
+})
+
+module.exports = {
+    getAllCourses, 
+    getCourse,
+    addCourse,
+    updateCourse,
+    deleteCourse
+}
