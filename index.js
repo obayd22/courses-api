@@ -5,10 +5,10 @@ require('dotenv').config();
 
 const httpStatusText = require('./utils/httpStatusText');
 
-const {router: coursesRouter} = require("./routes/courses.route");
+const coursesRouter = require("./routes/courses.route");
+const userRouter = require('./routes/users.route')
 
 const cors = require('cors');
-
 app.use(cors());
 
 app.use(express.json());
@@ -16,6 +16,8 @@ app.use(express.json());
 
 app.use("/api/courses", coursesRouter);
 // For any request whose URL starts with /api/courses, hand it over to coursesRouter.
+
+app.use('/api/users', userRouter);
 
 // global middleware for 'not found' router
 app.use((req, res) => {

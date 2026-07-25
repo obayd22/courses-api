@@ -18,4 +18,4 @@ router.route('/:courseID')
     .get(courseController.getCourse)
 
 
-module.exports = {router}
+module.exports = router;

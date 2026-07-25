@@ -8,7 +8,7 @@ const asyncWrapper = require('../middlewares/asyncWrapper');
 
 const appError = require('../utils/appError');
 
-const getAllCourses = async (req , res) => {
+const getAllCourses = asyncWrapper(async (req , res) => {
 
     const query = req.query; 
     
@@ -19,7 +19,7 @@ const getAllCourses = async (req , res) => {
 
     const courses = await Course.find({}, {'__v': false}).limit(limit).skip(skip);
     res.json({status: httpStatusText.SUCCESS, data: {courses: courses}});
-}
+})
 
 const getCourse = asyncWrapper (
 
