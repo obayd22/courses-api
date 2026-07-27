@@ -4,6 +4,8 @@ const router = express.Router();
 
 const userController = require('../controllers/users.controllers');
 
+const verifyToken = require('../middlewares/verifyToken');
+
 // register 
 
 // login

@@ -2,14 +2,16 @@ const asyncWrapper = require('../middlewares/asyncWrapper');
 const User = require('../models/user.model');
 const httpStatusText = require('../utils/httpStatusText');
 const appError = require('../utils/appError');
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const generatejwt = require('../utils/generatejwt');
 
 
 const getAllUsers = asyncWrapper(async (req , res) => {
 
     const query = req.query; 
     
-    const limit = query.limit || 2; 
+    const limit = query.limit || 10; 
     const page  = query.page  || 1;
     const skip  = (page - 1) * limit; // {page - 1} not to skip the page i am in
     // remember => we skip elements***
@@ -17,6 +19,7 @@ const getAllUsers = asyncWrapper(async (req , res) => {
     const users = await User.find({}, {'__v': false, 'password': false}).limit(limit).skip(skip);
     res.json({status: httpStatusText.SUCCESS, data: {users}});
 })
+
 
 
 const register = asyncWrapper(async (req, res, next) => {
@@ -40,6 +43,11 @@ const register = asyncWrapper(async (req, res, next) => {
        password: hashedPassword
     })
     await newUser.save();
+
+    // generate JWT token
+    const token = await generatejwt({email: newUser.email, id: newUser.id});
+    newUser.token = token;
+
     res.status(201).json({status: httpStatusText.SUCCESS, data: {user: newUser}}); 
 })
 
@@ -63,7 +71,9 @@ const login = asyncWrapper (async (req, res, next) => {
 
 
     if (user && matchedPassword) {
-        return res.json({status: httpStatusText.SUCCESS, data: {user: 'logged in successfully'}})
+        // logged in succssefully
+        const token = await generatejwt({email: user.email, id: user.id});
+        return res.json({status: httpStatusText.SUCCESS, data: {token}})
     } else {
         const error = appError.create('something is wrong', 500, httpStatusText.ERROR);
         return next(error);
