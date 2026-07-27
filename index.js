@@ -6,10 +6,16 @@ require('dotenv').config();
 const httpStatusText = require('./utils/httpStatusText');
 
 const coursesRouter = require("./routes/courses.route");
+
 const userRouter = require('./routes/users.route')
+
 
 const cors = require('cors');
 app.use(cors());
+
+const path = require('node:path');
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use(express.json());
 // If the request body contains JSON, parse it into a JavaScript object and store it in req.body
