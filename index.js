@@ -21,7 +21,7 @@ app.use('/api/users', userRouter);
 
 // global middleware for 'not found' router
 app.use((req, res) => {
-    res.status(404).json({status: httpStatusText.ERROR, message: "This resource is not avialable"})
+    res.status(404).json({status: httpStatusText.ERROR, message: "Not Found"})
 });
 
 //global error handler

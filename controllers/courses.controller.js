@@ -12,7 +12,7 @@ const getAllCourses = asyncWrapper(async (req , res) => {
 
     const query = req.query; 
     
-    const limit = query.limit || 2; 
+    const limit = query.limit || 10; 
     const page  = query.page  || 1;
     const skip  = (page - 1) * limit; // {page - 1} not to skip the page i am in
     // remember => we skip elements***
@@ -38,7 +38,7 @@ const addCourse = asyncWrapper( async (req, res, next) => {
         const errors = validationResult(req);
 
         if(!errors.isEmpty()) {            
-            const error = appError(errors.array(),400, httpStatusText.FAIL);
+            const error = appError.create(errors.array(),400, httpStatusText.FAIL);
             return next(error);
         }
         const newCourse = new Course (req.body);
