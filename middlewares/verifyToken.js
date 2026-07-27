@@ -12,10 +12,13 @@ const verifyToken = (req, res, next) => {
     const token = authHeader.split(' ')[1]; // split to ignore the bearer
 
     try {
-        jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const currentUser = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        req.currentUser = currentUser;
+        // here we manipulated the req body & added a the value of currentUser 
+        // this new value will be avail for any middleware AFTER verifyToken
         next();
     } catch(err) {
-        const error = appError.create('invalid token', 401, httpStatusText.ERROR);
+        const error = appError.create('This user is not authorized', 401, httpStatusText.ERROR);
         return next(error);
 }
     

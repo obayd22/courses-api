@@ -24,7 +24,7 @@ const getAllUsers = asyncWrapper(async (req , res) => {
 
 const register = asyncWrapper(async (req, res, next) => {
     console.log(req.body);
-    const {firstName, lastName, email, password} = req.body;
+    const {firstName, lastName, email, password, role} = req.body;
 
     const oldUser = await User.findOne({email: email});
 
@@ -40,12 +40,13 @@ const register = asyncWrapper(async (req, res, next) => {
        firstName, 
        lastName, 
        email, 
-       password: hashedPassword
+       password: hashedPassword,
+       role
     })
     await newUser.save();
 
     // generate JWT token
-    const token = await generatejwt({email: newUser.email, id: newUser.id});
+    const token = await generatejwt({email: newUser.email, id: newUser.id, role: newUser.role});
     newUser.token = token;
 
     res.status(201).json({status: httpStatusText.SUCCESS, data: {user: newUser}}); 
@@ -72,7 +73,7 @@ const login = asyncWrapper (async (req, res, next) => {
 
     if (user && matchedPassword) {
         // logged in succssefully
-        const token = await generatejwt({email: user.email, id: user.id});
+        const token = await generatejwt({email: user.email, id: user.id, role: user.role});
         return res.json({status: httpStatusText.SUCCESS, data: {token}})
     } else {
         const error = appError.create('something is wrong', 500, httpStatusText.ERROR);

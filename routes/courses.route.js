@@ -8,7 +8,11 @@ const courseController = require('../controllers/courses.controller');
 
 const verifyToken = require('../middlewares/verifyToken');
 
-const {validationSchema} = require('../middlewares/validationSchema')
+const {validationSchema} = require('../middlewares/validationSchema');
+
+const userRole = require('../utils/user.roles');
+
+const allowedTo = require('../middlewares/allowedTo');
 
 router.route('/')
     .get(courseController.getAllCourses)
@@ -16,8 +20,8 @@ router.route('/')
 
 router.route('/:courseID')
     .patch(courseController.updateCourse)
-    .delete(courseController.deleteCourse )
     .get(courseController.getCourse)
+    .delete(verifyToken, allowedTo(userRole.ADMIN, userRole.MANAGER), courseController.deleteCourse)
 
 
 module.exports = router;
